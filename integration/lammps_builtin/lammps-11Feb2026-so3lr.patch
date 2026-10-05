@@ -1,0 +1,16 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -680,6 +680,12 @@ foreach(PKG_WITH_INCL CORESHELL DPD-BASIC DPD-SMOOTH MC MISC PHONON QEQ OPENMP
+   endif()
+ endforeach()
+ 
++option(PKG_SO3LR "Build the native CUDA/Kokkos SO3LR pair style" OFF)
++mark_as_advanced(PKG_SO3LR)
++if(PKG_SO3LR)
++  include(Packages/SO3LR)
++endif()
++
+ if(PKG_PLUGIN)
+   target_compile_definitions(lammps PRIVATE -DLMP_PLUGIN)
+ endif()

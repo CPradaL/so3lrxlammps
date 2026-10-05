@@ -1,0 +1,19 @@
+# Isolated water molecule for SO3LR Stage-4 dev_9
+
+3 atoms
+2 atom types
+
+-20.0 20.0 xlo xhi
+-20.0 20.0 ylo yhi
+-20.0 20.0 zlo zhi
+
+Masses
+
+1 1.008
+2 15.999
+
+Atoms # atomic
+
+1 2 0.0000000 0.0000000 0.0000000
+2 1 0.9572000 0.0000000 0.0000000
+3 1 -0.2399872 0.9272970 0.0000000

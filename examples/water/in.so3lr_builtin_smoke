@@ -1,0 +1,30 @@
+# SO3LR smoke test for the built-in installation (PKG_SO3LR=ON).
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${DATA_FILE}
+
+pair_style      so3lr/native/mpi ${MODEL_FILE}
+# Mapping follows LAMMPS type order: type 1=H, type 2=O.
+pair_coeff      * * H O
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+comm_modify     cutoff 13.0
+
+thermo          5
+thermo_style    custom step atoms temp pe ke etotal press density vol
+thermo_modify   norm no lost error flush yes
+timer           full
+
+timestep        0.0001
+velocity        all create 300.0 590159 mom yes rot yes dist gaussian loop all
+run             0 post no
+
+fix             integrator all nve
+run             10 post yes
+
+print           "SO3LR_BUILTIN_SMOKE=PASS"

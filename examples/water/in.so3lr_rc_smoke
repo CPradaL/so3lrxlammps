@@ -1,0 +1,38 @@
+# SO3LR smoke test for the external plugin build (so3lrnativeplugin.so).
+plugin load ${PLUGIN_FILE}
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${DATA_FILE}
+
+pair_style      so3lr/native/mpi ${MODEL_FILE}
+pair_coeff      * * H O
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+comm_modify     cutoff 13.0
+
+thermo          5
+thermo_style    custom step atoms temp pe ke etotal press density vol
+thermo_modify   norm no lost error flush yes
+timer           full
+
+timestep        0.0001
+velocity        all create 300.0 590159 mom yes rot yes dist gaussian loop all
+run             0 post no
+write_dump      all custom ${INITIAL_DUMP} id type x y z fx fy fz modify sort id
+
+fix             integrator all nve
+run             10 post yes
+write_dump      all custom ${FINAL_DUMP} id type x y z vx vy vz fx fy fz modify sort id
+
+variable        final_pe equal $(pe:%.17g)
+variable        final_ke equal $(ke:%.17g)
+variable        final_etotal equal $(etotal:%.17g)
+variable        final_pressure equal $(press:%.17g)
+print           "SO3LR_PLUGIN_SMOKE step=$(step:%.0f) pe=${final_pe} ke=${final_ke} etotal=${final_etotal} pressure=${final_pressure}"
+print           "SO3LR_PLUGIN_SMOKE=PASS"

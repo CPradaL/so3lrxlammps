@@ -1,0 +1,17 @@
+# dioxygen O2, neutral triplet
+
+2 atoms
+1 atom types
+
+-25.0 25.0 xlo xhi
+-25.0 25.0 ylo yhi
+-25.0 25.0 zlo zhi
+
+Masses
+
+1 15.999
+
+Atoms # atomic
+
+1 1 -0.6050000 0.0000000 0.0000000
+2 1 0.6050000 0.0000000 0.0000000

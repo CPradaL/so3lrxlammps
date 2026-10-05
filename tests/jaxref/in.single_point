@@ -1,0 +1,23 @@
+# Single-point energy and forces for comparison against so3lr_reference.py.
+#
+# usage: lmp -var DATA_FILE x.data -var MODEL_FILE m.so3lr -var ELEMENTS "C H O N" \
+#            -var BOUNDARY "s s s" -var DUMP forces.dump -in in.single_point \
+#            [-var CHARGE -1 -var MULT 2]
+units           metal
+atom_style      atomic
+atom_modify     map yes
+boundary        ${BOUNDARY}
+newton          on
+read_data       ${DATA_FILE}
+variable        CHARGE index 0
+variable        MULT index 1
+pair_style      so3lr/native/mpi ${MODEL_FILE} ${CHARGE} ${MULT}
+pair_coeff      * * ${ELEMENTS}
+neighbor        1.0 bin
+comm_modify     cutoff 13.0
+dump            f all custom 1 ${DUMP} id type fx fy fz
+dump_modify     f sort id format float %.17e
+thermo_style    custom step pe
+run             0
+variable        e equal pe
+print           "SO3LR_SINGLE_POINT_PE ${e}"

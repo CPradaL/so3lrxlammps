@@ -1,0 +1,47 @@
+# Strong/weak scaling benchmark for pair_style so3lr/native/mpi.
+#
+# usage: lmp -var DATA_FILE water.data -var MODEL_FILE model.so3lr \
+#            -var NSTEPS 200 -var WARMUP 50 -var SEED 12345 \
+#            -in in.so3lr_scaling
+#
+# Deliberately NOT passed: -k on / -sf kk / -pk kokkos. The pair style owns its
+# own Kokkos/CUDA runtime and global LAMMPS Kokkos switches take dispatch
+# outside the validated adapter contract. Use one MPI rank per GPU instead.
+
+units           metal
+atom_style      atomic
+atom_modify     map yes
+boundary        p p p
+newton          on
+
+read_data       ${DATA_FILE}
+
+pair_style      so3lr/native/mpi ${MODEL_FILE}
+# Water boxes are generated with the C/H/O/N type order.
+pair_coeff      * * C H O N
+
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+# The pair style requests a 12 Angstrom long-range neighbour list; LAMMPS
+# refuses it unless the communication cutoff is at least as large.
+comm_modify     cutoff 13.0
+
+velocity        all create 300.0 ${SEED} dist gaussian
+timestep        0.0005
+
+thermo          50
+thermo_style    custom step temp press pe ke etotal vol cpu cpuremain
+thermo_modify   norm no lost error flush yes
+timer           full
+
+# Warmup: CUDA context, cuBLAS handles, workspace allocation, neighbour-list
+# settling. Excluded from the measurement.
+fix             integrator all nve
+run             ${WARMUP}
+unfix           integrator
+
+# Timed region. analyze_scaling.py reads the SECOND "Loop time" line.
+fix             integrator all nve
+run             ${NSTEPS}
+
+print           "SO3LR_SCALING=PASS"

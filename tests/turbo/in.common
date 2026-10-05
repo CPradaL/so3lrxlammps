@@ -1,0 +1,45 @@
+# One isolated molecule: single point, then optionally a short NVE run.
+# Used unchanged by both pair styles, so turbo and ordinary see the same input.
+#
+#   ordinary: lmp -var PAIR so3lr/native/mpi -var MODEL_FILE m.so3lr \
+#                 -var DATA_FILE x.data -var ELEMENTS "C H O" -var TAG x \
+#                 -var OUT dir -var RUN_STEPS 0 -var CHARGE 0 -var MULT 1 \
+#                 -in in.common
+#   turbo:    lmp -partition Nx1 -in in.turbo  (world variables, then this file)
+units           metal
+atom_style      atomic
+atom_modify     map array
+boundary        f f f
+newton          on
+log             ${OUT}/${TAG}.log
+read_data       ${DATA_FILE}
+pair_style      ${PAIR} ${MODEL_FILE} ${CHARGE} ${MULT}
+pair_coeff      * * ${ELEMENTS}
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+comm_modify     cutoff 13.0    # so3lr/native/mpi: LR list needs it
+
+dump            f all custom 1 ${OUT}/${TAG}.forces.dump id type fx fy fz
+dump_modify     f sort id format float %.17e
+thermo_style    custom step pe
+thermo_modify   format float %.17g
+run             0
+print           "SO3LR_SP tag=${TAG} pe=$(pe:%.17g)"
+undump          f
+
+if "${RUN_STEPS} > 0" then "jump SELF md"
+jump            SELF done
+
+label           md
+timestep        0.0005
+velocity        all create 300.0 4928459 mom yes rot yes dist gaussian
+fix             nve all nve
+thermo          50
+thermo_style    custom step temp pe ke etotal
+thermo_modify   norm no format float %.12f
+dump            traj all custom ${RUN_STEPS} ${OUT}/${TAG}.final.dump id x y z vx vy vz
+dump_modify     traj sort id format float %.17e
+run             ${RUN_STEPS}
+print           "SO3LR_MD tag=${TAG} pe=$(pe:%.17g) etotal=$(etotal:%.17g)"
+
+label           done

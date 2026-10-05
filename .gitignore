@@ -1,0 +1,57 @@
+# so3lr-lammps: files that are not part of the distributed package.
+
+# --- development material ------------------------------------------------------------
+# Notes, plans, design records, raw benchmark and validation data: keep them
+# under dev/ in a working copy; it is never committed.
+dev/
+
+# --- model weights ---------------------------------------------------------------------
+# Only the SO3LR model (models/so3lr.so3lr) is distributed. Keep every other
+# converted model out of the repository (LICENSE_STATUS.md).
+*.so3lr
+!/models/so3lr.so3lr
+
+# --- build products and caches ---------------------------------------------------------
+build/
+build-*/
+install/
+__pycache__/
+*.py[cod]
+*.o
+*.so
+*.a
+CMakeCache.txt
+CMakeFiles/
+Testing/
+
+# --- editor / OS noise -------------------------------------------------------------------
+.DS_Store
+._*
+*.swp
+*~
+.vscode/
+.idea/
+
+# --- LaTeX byproducts ----------------------------------------------------------------------
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.bbl
+*.blg
+
+# --- run output (examples and benchmarks write these where they run) ------------------------
+log.lammps
+log.cite
+*.dump
+slurm-*.out
+so3lr-*-[0-9]*.out
+so3lr-*-[0-9]*.err
+turbo-example-*/
+turbo-validate-*/
+examples/scaling/data/
+examples/scaling/results/
+examples/scaling/plots/

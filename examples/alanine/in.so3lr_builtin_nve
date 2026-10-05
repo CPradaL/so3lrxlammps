@@ -1,0 +1,24 @@
+# C/H/O/N transferability smoke test for a directly compiled pair style.
+units           metal
+atom_style      atomic
+atom_modify     map array
+boundary        s s s
+
+read_data       ${DATA_FILE}
+
+pair_style      so3lr/native/mpi ${MODEL_FILE}
+# alanine.data atom types are C, H, O, N.
+pair_coeff      * * C H O N
+
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+comm_modify     cutoff 13.0
+timestep        0.0005
+
+thermo          100
+thermo_style    custom step atoms temp pe ke etotal press
+thermo_modify   norm no lost error flush yes
+
+fix             integrator all nve
+run             1000
+print           "SO3LR_ALANINE_BUILTIN=PASS"

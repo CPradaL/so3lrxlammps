@@ -1,0 +1,32 @@
+units           metal
+atom_style      atomic
+atom_modify     map array
+boundary        f f f
+
+@IMAGE_VARIABLE@
+@SEED_VARIABLE@
+
+log             ${OUT_ROOT}/image_${IMAGE}/log.lammps
+read_data       ${DATA_FILE}
+
+pair_style      so3lr/turbo ${MODEL_FILE}
+pair_coeff      * * H O
+
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+timestep        0.0001
+
+velocity        all create 300.0 ${SEED} mom yes rot yes dist gaussian
+fix             integrator all nve
+
+thermo          100
+thermo_style    custom step atoms temp pe ke etotal
+thermo_modify   norm no lost error flush yes
+
+dump            endpoints all custom ${RUN_STEPS} ${OUT_ROOT}/image_${IMAGE}/trajectory.dump id type x y z vx vy vz fx fy fz
+dump_modify     endpoints sort id format float %24.16e
+
+run             0 post no
+run             ${RUN_STEPS}
+
+print           "SO3LR_TURBO_EXAMPLE_FINAL images=${NIMAGES} image=${IMAGE} seed=${SEED} step=$(step) temp=$(temp:%.17g) pe=$(pe:%.17g) etotal=$(etotal:%.17g)"
